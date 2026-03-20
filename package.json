@@ -1,0 +1,30 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "seed:scholars": "node scripts/seedScholars.js",
+    "seed:events": "node scripts/seedEvents.js",
+    "seed:blogs": "node scripts/seedBlogs.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.19.1",
+    "nodemailer": "^8.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
