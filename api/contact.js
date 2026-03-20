@@ -1,5 +1,6 @@
 import express from "express";
 import nodemailer from "nodemailer";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -19,6 +20,28 @@ const WEBSITE_URL =
   getRequiredEnv("WEBSITE_URL") || "https://noblescholarsfoundation.com";
 const WHATSAPP_URL =
   getRequiredEnv("CONTACT_WHATSAPP_URL") || "https://wa.me/2349032924722";
+const logoExists = fs.existsSync(LOGO_PATH);
+
+const buildLogoAttachment = () =>
+  logoExists
+    ? [
+        {
+          filename: "noble-logo.png",
+          path: LOGO_PATH,
+          cid: LOGO_CID,
+        },
+      ]
+    : [];
+
+const renderLogo = () =>
+  logoExists
+    ? `<img src="cid:${LOGO_CID}" alt="Noble Scholars Foundation" style="height:56px;width:auto;display:block;background:#ffffff;border-radius:12px;padding:6px;" />`
+    : "";
+
+const renderLargeLogo = () =>
+  logoExists
+    ? `<img src="cid:${LOGO_CID}" alt="Noble Scholars Foundation" style="height:60px;width:auto;display:block;background:#ffffff;border-radius:14px;padding:6px;" />`
+    : "";
 
 const escapeHtml = (value) =>
   String(value)
@@ -33,7 +56,7 @@ const buildInboxHtml = ({ name, email, subject, message }) => `
     <div style="max-width:680px;margin:0 auto;padding:32px 16px;">
       <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:20px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,0.08);">
         <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:28px 32px;">
-          <img src="cid:${LOGO_CID}" alt="Noble Scholars Foundation" style="height:56px;width:auto;display:block;background:#ffffff;border-radius:12px;padding:6px;" />
+          ${renderLogo()}
           <p style="margin:18px 0 0;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#f8fafc;opacity:0.82;font-weight:700;">New Website Inquiry</p>
         </div>
         <div style="padding:32px;">
@@ -67,7 +90,7 @@ const buildAutoReplyHtml = ({ name }) => `
     <div style="max-width:680px;margin:0 auto;padding:32px 16px;">
       <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:22px;overflow:hidden;box-shadow:0 12px 32px rgba(15,23,42,0.08);">
         <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:32px 32px 28px;">
-          <img src="cid:${LOGO_CID}" alt="Noble Scholars Foundation" style="height:60px;width:auto;display:block;background:#ffffff;border-radius:14px;padding:6px;" />
+          ${renderLargeLogo()}
           <p style="margin:18px 0 0;font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#f8fafc;opacity:0.82;font-weight:700;">We Received Your Message</p>
           <h1 style="margin:14px 0 0;font-size:28px;line-height:1.25;color:#ffffff;">Thank you for contacting Noble Scholars Foundation.</h1>
         </div>
@@ -172,13 +195,7 @@ router.post("/", async (req, res) => {
         `Subject: ${subject}\n\n` +
         `Message:\n${message}`,
       html: buildInboxHtml({ name, email, subject, message }),
-      attachments: [
-        {
-          filename: "noble-logo.png",
-          path: LOGO_PATH,
-          cid: LOGO_CID,
-        },
-      ],
+      attachments: buildLogoAttachment(),
     });
 
     await transporter.sendMail({
@@ -190,13 +207,7 @@ router.post("/", async (req, res) => {
         `Hi ${name}, thanks for contacting Noble Scholars Foundation. ` +
         `We've received your message and our team will get back to you shortly.`,
       html: buildAutoReplyHtml({ name }),
-      attachments: [
-        {
-          filename: "noble-logo.png",
-          path: LOGO_PATH,
-          cid: LOGO_CID,
-        },
-      ],
+      attachments: buildLogoAttachment(),
     });
 
     return res.json({
